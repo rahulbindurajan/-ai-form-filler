@@ -31,7 +31,7 @@ function App() {
               AI Banking Form Filler
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.8 }}>
-              Powered by Gemini 1.5 Flash — Fill forms in seconds
+              Powered by Gemini 2.5 Flash — Fill forms in seconds
             </Typography>
           </Box>
         </Box>

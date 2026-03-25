@@ -32,7 +32,7 @@ export async function parseNaturalLanguage(
 ): Promise<Partial<PaymentFormData>> {
   const genAI = getClient();
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     generationConfig: { responseMimeType: 'application/json' },
   });
 
@@ -54,7 +54,7 @@ export async function parseNaturalLanguage(
 export async function parseDocument(base64Image: string, mimeType: string): Promise<Partial<PaymentFormData>> {
   const genAI = getClient();
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     generationConfig: { responseMimeType: 'application/json' },
   });
 
@@ -74,7 +74,7 @@ Rules: split full name into firstName/lastName, convert written numbers to digit
 
 export async function askFieldHelp(question: string, fieldName: string): Promise<string> {
   const genAI = getClient();
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const safeQuestion = question.replace(/<[^>]*>/g, '').slice(0, 300);
 
@@ -93,7 +93,7 @@ export async function getMissingFieldQuestion(
   if (missing.length === 0) return null;
 
   const genAI = getClient();
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const prompt = `You are a friendly banking assistant collecting transfer details. Ask for ONE missing field at a time in a natural, conversational way. Be brief.
 Already collected: ${filledFields.join(', ')}.
@@ -107,7 +107,7 @@ Ask for the most important missing field next.`;
 export async function validateForm(formData: PaymentFormData): Promise<{ valid: boolean; issues: string[] }> {
   const genAI = getClient();
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     generationConfig: { responseMimeType: 'application/json' },
   });
 

@@ -141,7 +141,7 @@ export function FloatingChatBar() {
               </Avatar>
               <Box>
                 <Typography variant="subtitle2" fontWeight={700}>AI Banking Assistant</Typography>
-                <Typography variant="caption" sx={{ opacity: 0.8 }}>Powered by Gemini 1.5</Typography>
+                <Typography variant="caption" sx={{ opacity: 0.8 }}>Powered by Gemini 2.5</Typography>
               </Box>
             </Box>
             <IconButton size="small" onClick={() => setOpen(false)} sx={{ color: 'white' }}>

@@ -21,16 +21,22 @@ export function FormPanel() {
   const [helpQuestion, setHelpQuestion] = useState('');
   const [helpAnswer, setHelpAnswer] = useState('');
   const [helpLoading, setHelpLoading] = useState(false);
+  const [helpError, setHelpError] = useState('');
   const [validation, setValidation] = useState<{ valid: boolean; issues: string[] } | null>(null);
   const [validating, setValidating] = useState(false);
 
   const handleHelp = async (field: FormField) => {
     setHelpField(field);
     setHelpAnswer('');
+    setHelpError('');
     setHelpQuestion(`What is ${FIELD_LABELS[field]}?`);
     setHelpLoading(true);
-    const answer = await askFieldHelp(`What is ${FIELD_LABELS[field]}?`, FIELD_LABELS[field]);
-    setHelpAnswer(answer);
+    try {
+      const answer = await askFieldHelp(`What is ${FIELD_LABELS[field]}?`, FIELD_LABELS[field]);
+      setHelpAnswer(answer);
+    } catch (e: unknown) {
+      setHelpError(e instanceof Error ? e.message : 'Failed to get AI help. Please try again.');
+    }
     setHelpLoading(false);
   };
 
@@ -38,16 +44,25 @@ export function FormPanel() {
     if (!helpField || !helpQuestion.trim()) return;
     setHelpLoading(true);
     setHelpAnswer('');
-    const answer = await askFieldHelp(helpQuestion, FIELD_LABELS[helpField]);
-    setHelpAnswer(answer);
+    setHelpError('');
+    try {
+      const answer = await askFieldHelp(helpQuestion, FIELD_LABELS[helpField]);
+      setHelpAnswer(answer);
+    } catch (e: unknown) {
+      setHelpError(e instanceof Error ? e.message : 'Failed to get AI help. Please try again.');
+    }
     setHelpLoading(false);
   };
 
   const handleValidate = async () => {
     setValidating(true);
     setValidation(null);
-    const result = await validateForm(formData);
-    setValidation(result);
+    try {
+      const result = await validateForm(formData);
+      setValidation(result);
+    } catch (e: unknown) {
+      setValidation({ valid: false, issues: [e instanceof Error ? e.message : 'Validation failed. Please try again.'] });
+    }
     setValidating(false);
   };
 
@@ -292,6 +307,11 @@ export function FormPanel() {
             </Button>
           </Box>
           {helpLoading && <CircularProgress size={18} />}
+          {helpError && (
+            <Alert severity="error" sx={{ mt: 1 }} onClose={() => setHelpError('')}>
+              {helpError}
+            </Alert>
+          )}
           {helpAnswer && (
             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
               {helpAnswer}
