@@ -6,7 +6,7 @@ import { NLPInput } from './components/NLPInput';
 import { DocumentUpload } from './components/DocumentUpload';
 import { FloatingChatBar } from './components/FloatingChatBar';
 
-const hasApiKey = !!import.meta.env.VITE_OPENAI_API_KEY;
+const hasApiKey = !!import.meta.env.VITE_GEMINI_API_KEY;
 
 function App() {
   return (
@@ -31,7 +31,7 @@ function App() {
               AI Banking Form Filler
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.8 }}>
-              Powered by GPT-4o — Fill forms in seconds
+              Powered by Gemini 1.5 Flash — Fill forms in seconds
             </Typography>
           </Box>
         </Box>
@@ -40,7 +40,7 @@ function App() {
           {/* API Key Warning */}
           {!hasApiKey && (
             <Alert severity="warning" sx={{ mb: 3 }}>
-              <strong>Missing API Key:</strong> Add <code>VITE_OPENAI_API_KEY=sk-...</code> to your <code>.env</code> file and restart the dev server.
+              <strong>Missing API Key:</strong> Add <code>VITE_GEMINI_API_KEY=your-key</code> to your <code>.env</code> file and restart the dev server.
             </Alert>
           )}
 

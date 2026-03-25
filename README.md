@@ -2,7 +2,7 @@
 
 An AI-powered web app that fills banking payment forms automatically — from a plain English sentence or an uploaded invoice image.
 
-Built with **React + TypeScript + Vite** and powered by **OpenAI GPT-4o**.
+Built with **React + TypeScript + Vite** and powered by **Google Gemini 1.5 Flash**.
 
 ---
 
@@ -41,7 +41,7 @@ Instead of manually typing into every form field, users can:
 | React 19 + TypeScript | Frontend framework |
 | Vite | Dev server and build tool |
 | Material UI (MUI) | UI components |
-| OpenAI SDK (`openai`) | AI integration |
+| Google Generative AI SDK (`@google/generative-ai`) | AI integration |
 | React Dropzone | File/image upload |
 | html2pdf.js | Export form to PDF |
 
@@ -49,17 +49,17 @@ Instead of manually typing into every form field, users can:
 
 ## API Integrated
 
-### OpenAI API
+### Google Gemini API
 
-This app uses the **OpenAI Chat Completions API** with two models:
+This app uses the **Google Generative AI (Gemini) API** with one model for all tasks:
 
 | Model | Used For |
 |-------|---------|
-| `gpt-4o-mini` | Natural language parsing, inline help, validation, chat assistant |
-| `gpt-4o` | Document/image reading (vision) |
+| `gemini-1.5-flash` | Natural language parsing, inline help, validation, chat assistant, document/image reading (vision) |
 
-**Endpoints used:**
-- `POST https://api.openai.com/v1/chat/completions`
+**SDK:** `@google/generative-ai`
+
+**Gemini 1.5 Flash** supports both text and vision (images/PDFs) in a single model — making it simpler and more cost-effective than using separate models.
 
 ---
 
@@ -67,7 +67,7 @@ This app uses the **OpenAI Chat Completions API** with two models:
 
 | Key | Where to get it | Where it goes |
 |-----|----------------|---------------|
-| `VITE_OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | `.env` file |
+| `VITE_GEMINI_API_KEY` | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) | `.env` file |
 
 ### Setup
 
@@ -78,7 +78,7 @@ This app uses the **OpenAI Chat Completions API** with two models:
 
 2. Open `.env` and add your key:
    ```
-   VITE_OPENAI_API_KEY=sk-your-real-key-here
+   VITE_GEMINI_API_KEY=your-gemini-api-key-here
    ```
 
 > **Important:** Never commit the `.env` file. It is already listed in `.gitignore`.

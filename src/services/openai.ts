@@ -1,13 +1,13 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { ChatMessage, PaymentFormData } from '../types/form';
 
 function getClient() {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY as string;
-  if (!apiKey) throw new Error('Missing VITE_OPENAI_API_KEY in .env file');
-  return new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
+  if (!apiKey) throw new Error('Missing VITE_GEMINI_API_KEY in .env file');
+  return new GoogleGenerativeAI(apiKey);
 }
 
-const EXTRACT_SYSTEM = `You are a banking assistant. Extract payment details from user input.
+const EXTRACT_PROMPT = `You are a banking assistant. Extract payment details from user input.
 Return ONLY valid JSON with these exact keys (use empty string if not found):
 {
   "firstName": "",
@@ -30,72 +30,59 @@ export async function parseNaturalLanguage(
   input: string,
   history: ChatMessage[] = []
 ): Promise<Partial<PaymentFormData>> {
-  const client = getClient();
-
-  // Sanitize input to prevent prompt injection
-  const safeInput = input.replace(/<[^>]*>/g, '').slice(0, 500);
-
-  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    { role: 'system', content: EXTRACT_SYSTEM },
-    ...history.map(m => ({ role: m.role, content: m.content } as OpenAI.Chat.ChatCompletionMessageParam)),
-    { role: 'user', content: safeInput },
-  ];
-
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages,
-    response_format: { type: 'json_object' },
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+    generationConfig: { responseMimeType: 'application/json' },
   });
 
-  return JSON.parse(response.choices[0].message.content ?? '{}');
+  // Sanitize input
+  const safeInput = input.replace(/<[^>]*>/g, '').slice(0, 500);
+
+  // Build conversation context from history
+  const context = history.length > 0
+    ? history.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') + '\n'
+    : '';
+
+  const prompt = `${EXTRACT_PROMPT}\n\n${context}User: ${safeInput}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  return JSON.parse(text);
 }
 
 export async function parseDocument(base64Image: string, mimeType: string): Promise<Partial<PaymentFormData>> {
-  const client = getClient();
-
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [{
-      role: 'user',
-      content: [
-        {
-          type: 'text',
-          text: `Extract payment/transfer details from this document.
-Return ONLY valid JSON with these exact keys (empty string if not found):
-{ "firstName": "", "lastName": "", "accountNumber": "", "routingNumber": "", "amount": "", "currency": "USD", "memo": "", "paymentDate": "" }
-Rules: split full name into firstName/lastName, convert written numbers to digits, amount as digits only.`
-        },
-        {
-          type: 'image_url',
-          image_url: { url: `data:${mimeType};base64,${base64Image}` }
-        }
-      ]
-    }],
-    response_format: { type: 'json_object' },
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+    generationConfig: { responseMimeType: 'application/json' },
   });
 
-  return JSON.parse(response.choices[0].message.content ?? '{}');
+  const prompt = `Extract payment/transfer details from this document.
+Return ONLY valid JSON with these exact keys (empty string if not found):
+{ "firstName": "", "lastName": "", "accountNumber": "", "routingNumber": "", "amount": "", "currency": "USD", "memo": "", "paymentDate": "" }
+Rules: split full name into firstName/lastName, convert written numbers to digits, amount as digits only.`;
+
+  const result = await model.generateContent([
+    prompt,
+    { inlineData: { mimeType, data: base64Image } },
+  ]);
+
+  const text = result.response.text();
+  return JSON.parse(text);
 }
 
 export async function askFieldHelp(question: string, fieldName: string): Promise<string> {
-  const client = getClient();
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
   const safeQuestion = question.replace(/<[^>]*>/g, '').slice(0, 300);
 
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: 'You are a helpful banking assistant. Answer questions about banking form fields in 2–3 clear sentences. Be friendly and simple.'
-      },
-      {
-        role: 'user',
-        content: `Field: "${fieldName}". Question: ${safeQuestion}`
-      }
-    ],
-  });
+  const prompt = `You are a helpful banking assistant. Answer questions about banking form fields in 2–3 clear sentences. Be friendly and simple.
+Field: "${fieldName}". Question: ${safeQuestion}`;
 
-  return response.choices[0].message.content ?? 'Sorry, I could not answer that.';
+  const result = await model.generateContent(prompt);
+  return result.response.text();
 }
 
 export async function getMissingFieldQuestion(
@@ -105,44 +92,32 @@ export async function getMissingFieldQuestion(
   const missing = allFields.filter(f => !filledFields.includes(f));
   if (missing.length === 0) return null;
 
-  const client = getClient();
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: 'You are a friendly banking assistant collecting transfer details. Ask for ONE missing field at a time in a natural, conversational way. Be brief.'
-      },
-      {
-        role: 'user',
-        content: `Already collected: ${filledFields.join(', ')}. Still need: ${missing.join(', ')}. Ask for the most important missing field next.`
-      }
-    ],
-  });
+  const prompt = `You are a friendly banking assistant collecting transfer details. Ask for ONE missing field at a time in a natural, conversational way. Be brief.
+Already collected: ${filledFields.join(', ')}.
+Still need: ${missing.join(', ')}.
+Ask for the most important missing field next.`;
 
-  return response.choices[0].message.content ?? null;
+  const result = await model.generateContent(prompt);
+  return result.response.text();
 }
 
 export async function validateForm(formData: PaymentFormData): Promise<{ valid: boolean; issues: string[] }> {
-  const client = getClient();
-
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `You are a banking form validator. Check if the payment form data is valid and makes sense.
-Return ONLY valid JSON: { "valid": true/false, "issues": ["issue1", "issue2"] }
-Check: account number format (8-17 digits), routing number (exactly 9 digits), amount is positive number, required fields not empty.`
-      },
-      {
-        role: 'user',
-        content: JSON.stringify(formData)
-      }
-    ],
-    response_format: { type: 'json_object' },
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+    generationConfig: { responseMimeType: 'application/json' },
   });
 
-  return JSON.parse(response.choices[0].message.content ?? '{"valid":false,"issues":["Validation failed"]}');
+  const prompt = `You are a banking form validator. Check if the payment form data is valid and makes sense.
+Return ONLY valid JSON: { "valid": true/false, "issues": ["issue1", "issue2"] }
+Check: account number format (8-17 digits), routing number (exactly 9 digits), amount is positive number, required fields not empty.
+
+Form data: ${JSON.stringify(formData)}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  return JSON.parse(text);
 }
