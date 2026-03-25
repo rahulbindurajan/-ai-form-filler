@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Form Filler — Team Presentation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+    }
+
+    .slide {
+      width: 960px;
+      min-height: 540px;
+      margin: 32px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 56px 64px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide-number {
+      position: absolute;
+      top: 20px;
+      right: 28px;
+      font-size: 13px;
+      color: #a0aec0;
+      font-weight: 500;
+    }
+
+    /* ── Slide 1: Title ── */
+    .slide-title {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 480px;
+    }
+    .slide-title .tag {
+      background: rgba(255,255,255,0.18);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .slide-title h1 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .slide-title p {
+      font-size: 20px;
+      opacity: 0.85;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+    .slide-title .meta {
+      margin-top: 40px;
+      font-size: 14px;
+      opacity: 0.65;
+    }
+
+    /* ── Slide 2: Problem ── */
+    .slide h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2b6cb0;
+      margin-bottom: 32px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid #ebf4ff;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 8px;
+    }
+    .problem-card {
+      background: #fff5f5;
+      border-left: 4px solid #fc8181;
+      border-radius: 10px;
+      padding: 20px 22px;
+    }
+    .problem-card .icon { font-size: 28px; margin-bottom: 10px; }
+    .problem-card h3 { font-size: 16px; font-weight: 700; color: #c53030; margin-bottom: 6px; }
+    .problem-card p { font-size: 14px; color: #4a5568; line-height: 1.6; }
+
+    /* ── Slide 3: Solution ── */
+    .solution-box {
+      background: #ebf8ff;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      border-left: 5px solid #3182ce;
+    }
+    .solution-box p {
+      font-size: 20px;
+      color: #2c5282;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .flow-step {
+      background: #f7fafc;
+      border: 2px solid #bee3f8;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #2b6cb0;
+      text-align: center;
+    }
+    .flow-arrow {
+      font-size: 22px;
+      color: #90cdf4;
+      font-weight: 700;
+    }
+
+    /* ── Slide 4: Features ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .feature-card {
+      border-radius: 12px;
+      padding: 22px 24px;
+      background: #f7fafc;
+      border: 1.5px solid #e2e8f0;
+    }
+    .feature-card .num {
+      display: inline-block;
+      background: #2b6cb0;
+      color: white;
+      border-radius: 8px;
+      width: 30px; height: 30px;
+      line-height: 30px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+    .feature-card p { font-size: 13.5px; color: #718096; line-height: 1.6; }
+
+    /* ── Slide 5: How It Works ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 20px;
+      background: #f7fafc;
+      border-radius: 10px;
+    }
+    .step-num {
+      min-width: 36px; height: 36px;
+      background: linear-gradient(135deg, #2b6cb0, #4299e1);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px;
+    }
+    .step-content h4 { font-size: 15px; font-weight: 700; color: #2d3748; margin-bottom: 3px; }
+    .step-content p { font-size: 13.5px; color: #718096; }
+
+    /* ── Slide 6: Tech Stack ── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 8px;
+    }
+    .stack-card {
+      text-align: center;
+      padding: 24px 16px;
+      border-radius: 12px;
+      background: #f7fafc;
+      border: 1.5px solid #e2e8f0;
+    }
+    .stack-card .tech-icon { font-size: 36px; margin-bottom: 10px; }
+    .stack-card h3 { font-size: 16px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+    .stack-card p { font-size: 12.5px; color: #718096; }
+
+    /* ── Slide 7: Security & Rules ── */
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .rules-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: #f7fafc;
+      font-size: 14.5px;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+    .rules-list li .badge {
+      min-width: 28px; height: 28px;
+      background: #48bb78;
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .rules-list li .badge.red { background: #fc8181; }
+
+    /* ── Slide 8: Benefits ── */
+    .benefit-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+    .before-after {
+      flex: 1;
+      border-radius: 12px;
+      padding: 22px;
+    }
+    .before-after.before { background: #fff5f5; border: 1.5px solid #fed7d7; }
+    .before-after.after  { background: #f0fff4; border: 1.5px solid #c6f6d5; }
+    .before-after h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .before-after.before h3 { color: #c53030; }
+    .before-after.after h3  { color: #276749; }
+    .before-after ul { list-style: none; }
+    .before-after ul li { font-size: 13.5px; color: #4a5568; margin-bottom: 8px; padding-left: 18px; position: relative; }
+    .before-after ul li::before { content: '•'; position: absolute; left: 0; }
+
+    .stat-row {
+      display: flex;
+      gap: 20px;
+    }
+    .stat-box {
+      flex: 1;
+      text-align: center;
+      background: #ebf8ff;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-box .big { font-size: 36px; font-weight: 800; color: #2b6cb0; }
+    .stat-box p { font-size: 13px; color: #4a5568; margin-top: 4px; }
+
+    /* ── Slide 9: Roadmap ── */
+    .roadmap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 8px;
+    }
+    .phase {
+      border-radius: 12px;
+      padding: 22px 24px;
+      background: #f7fafc;
+      border: 1.5px solid #e2e8f0;
+    }
+    .phase .phase-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .phase.p1 .phase-tag { background: #c6f6d5; color: #276749; }
+    .phase.p2 .phase-tag { background: #bee3f8; color: #2c5282; }
+    .phase.p3 .phase-tag { background: #fefcbf; color: #744210; }
+    .phase.p4 .phase-tag { background: #fed7d7; color: #c53030; }
+    .phase h3 { font-size: 16px; font-weight: 700; color: #2d3748; margin-bottom: 10px; }
+    .phase ul { list-style: none; }
+    .phase ul li { font-size: 13px; color: #718096; margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .phase ul li::before { content: '→'; position: absolute; left: 0; color: #a0aec0; }
+
+    /* ── Slide 10: Thank You ── */
+    .slide-end {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 480px;
+    }
+    .slide-end h1 { font-size: 52px; font-weight: 800; margin-bottom: 16px; }
+    .slide-end p { font-size: 20px; opacity: 0.85; max-width: 520px; line-height: 1.6; }
+    .slide-end .tagline {
+      margin-top: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 18px 32px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* Print */
+    @media print {
+      body { background: white; }
+      .slide { margin: 0; border-radius: 0; box-shadow: none; width: 100%; }
+    }
+
+    /* Print button */
+    .print-btn {
+      display: block;
+      width: 200px;
+      margin: 0 auto 16px;
+      padding: 14px 0;
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .print-btn:hover { background: #2c5282; }
+    @media print { .print-btn { display: none; } }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">Save as PDF</button>
+
+  <!-- Slide 1: Title -->
+  <div class="slide slide-title">
+    <div class="tag">Internal Team Presentation</div>
+    <h1>AI Banking<br>Form Filler</h1>
+    <p>An intelligent assistant that fills banking forms automatically — from a simple sentence or uploaded document.</p>
+    <div class="meta">March 2026 &nbsp;·&nbsp; Frontend AI Project</div>
+  </div>
+
+  <!-- Slide 2: The Problem -->
+  <div class="slide">
+    <div class="slide-number">2 / 10</div>
+    <h2>The Problem</h2>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon">⏱️</div>
+        <h3>Slow</h3>
+        <p>Customers manually fill 8–12 fields for every single payment transfer. It takes 3–5 minutes each time.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">❌</div>
+        <h3>Error Prone</h3>
+        <p>Wrong account numbers, typos in names, incorrect amounts — manual entry causes costly mistakes.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">👴</div>
+        <h3>Poor Accessibility</h3>
+        <p>Elderly users and people with low digital literacy struggle with complex multi-field banking forms.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">📱</div>
+        <h3>Mobile Friction</h3>
+        <p>Typing long account numbers and routing numbers on mobile is frustrating and leads to drop-offs.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: The Solution -->
+  <div class="slide">
+    <div class="slide-number">3 / 10</div>
+    <h2>Our Solution</h2>
+    <div class="solution-box">
+      <p>A floating AI chat bar that sits on top of the existing bank form and fills it automatically as the customer describes their transfer in plain English.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">Customer types<br>a sentence</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">AI reads<br>& understands</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Form fields<br>auto-filled</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">AI asks for<br>missing info</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Customer<br>reviews & submits</div>
+    </div>
+  </div>
+
+  <!-- Slide 4: Features -->
+  <div class="slide">
+    <div class="slide-number">4 / 10</div>
+    <h2>Key Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="num">1</div>
+        <h3>Natural Language Input</h3>
+        <p>Type "Pay $500 to John, account 9876543210" and all fields fill instantly. No more typing each box.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">2</div>
+        <h3>Document Upload</h3>
+        <p>Upload an invoice photo or PDF — AI reads it and extracts all payment details into the form.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">3</div>
+        <h3>Conversational Filling</h3>
+        <p>If info is missing, AI asks one question at a time: "What is the routing number?" — like a helpful assistant.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">4</div>
+        <h3>Inline AI Help</h3>
+        <p>Click help on any field and ask "What is a routing number?" — AI answers right inside the form.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">5</div>
+        <h3>Visual Highlights</h3>
+        <p>All AI-filled fields are highlighted with a colored border — customer can clearly see what was auto-filled.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">6</div>
+        <h3>PDF Export</h3>
+        <p>Download the completed form as a PDF for records or offline sharing.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5: How It Works -->
+  <div class="slide">
+    <div class="slide-number">5 / 10</div>
+    <h2>How It Works — Step by Step</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Customer opens the bank transfer page</h4>
+          <p>A floating AI chat bar appears at the bottom of the existing form — no page redirect needed.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Customer describes the transfer</h4>
+          <p>"Send five hundred dollars to John Doe, account 9876543210" — or uploads an invoice image.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>AI extracts and fills all fields</h4>
+          <p>Name split into First/Last, amount converted from words to digits, currency defaults to USD, fields highlighted.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>AI asks only for what's missing</h4>
+          <p>If routing number is not provided, AI asks once: "Could you provide the routing number?" Never repeats itself.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Customer reviews and submits</h4>
+          <p>The AI never submits the form. The customer always has full control over the final action.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 6: Tech Stack -->
+  <div class="slide">
+    <div class="slide-number">6 / 10</div>
+    <h2>Technology Stack</h2>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="tech-icon">⚛️</div>
+        <h3>React + TypeScript</h3>
+        <p>Builds the web interface. TypeScript ensures reliable, bug-free code.</p>
+      </div>
+      <div class="stack-card">
+        <div class="tech-icon">🤖</div>
+        <h3>OpenAI GPT-4o</h3>
+        <p>The AI brain. Understands natural language and reads images/documents.</p>
+      </div>
+      <div class="stack-card">
+        <div class="tech-icon">🎨</div>
+        <h3>Material UI</h3>
+        <p>Ready-made professional UI components. Fast, accessible, responsive.</p>
+      </div>
+      <div class="stack-card">
+        <div class="tech-icon">⚡</div>
+        <h3>Vite</h3>
+        <p>Ultra-fast development server and build tool. Instant hot reload.</p>
+      </div>
+      <div class="stack-card">
+        <div class="tech-icon">📄</div>
+        <h3>html2pdf.js</h3>
+        <p>Converts the filled form to a downloadable PDF in one click.</p>
+      </div>
+      <div class="stack-card">
+        <div class="tech-icon">🖥️</div>
+        <h3>No Backend Needed</h3>
+        <p>Runs entirely in the browser. No server setup, no database, no deployment complexity.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 7: Security & Rules -->
+  <div class="slide">
+    <div class="slide-number">7 / 10</div>
+    <h2>Security &amp; Privacy Rules</h2>
+    <ul class="rules-list">
+      <li>
+        <span class="badge">✓</span>
+        <div><strong>No data stored on server</strong> — all form data stays in the customer's browser. When the tab closes, everything is wiped.</div>
+      </li>
+      <li>
+        <span class="badge">✓</span>
+        <div><strong>Customer always submits</strong> — the AI fills fields but never submits the form. Full control stays with the customer.</div>
+      </li>
+      <li>
+        <span class="badge">✓</span>
+        <div><strong>Prompt injection protection</strong> — all user input is sanitized before being sent to the AI to prevent malicious commands.</div>
+      </li>
+      <li>
+        <span class="badge">✓</span>
+        <div><strong>Session-only memory</strong> — the AI does not remember previous conversations. Each session starts fresh.</div>
+      </li>
+      <li>
+        <span class="badge red">!</span>
+        <div><strong>Future: Backend proxy</strong> — for enterprise use, API keys should move server-side to prevent exposure in the browser.</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Slide 8: Benefits -->
+  <div class="slide">
+    <div class="slide-number">8 / 10</div>
+    <h2>Before vs. After</h2>
+    <div class="benefit-row">
+      <div class="before-after before">
+        <h3>Before (Today)</h3>
+        <ul>
+          <li>Fill 8–12 fields manually</li>
+          <li>3–5 minutes per transfer</li>
+          <li>High chance of typos</li>
+          <li>Confusing for elderly users</li>
+          <li>Painful on mobile</li>
+        </ul>
+      </div>
+      <div class="before-after after">
+        <h3>After (Our App)</h3>
+        <ul>
+          <li>Type one sentence or upload invoice</li>
+          <li>Under 30 seconds per transfer</li>
+          <li>AI validates fields automatically</li>
+          <li>Guided step by step in plain English</li>
+          <li>Works perfectly on mobile</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="big">10×</div>
+        <p>Faster form completion</p>
+      </div>
+      <div class="stat-box">
+        <div class="big">~0</div>
+        <p>Manual typing required</p>
+      </div>
+      <div class="stat-box">
+        <div class="big">100%</div>
+        <p>Customer controls submission</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 9: Roadmap -->
+  <div class="slide">
+    <div class="slide-number">9 / 10</div>
+    <h2>Roadmap</h2>
+    <div class="roadmap">
+      <div class="phase p1">
+        <span class="phase-tag">Phase 1 — Now</span>
+        <h3>Core MVP</h3>
+        <ul>
+          <li>Natural language form fill</li>
+          <li>Document / invoice upload</li>
+          <li>Highlighted auto-filled fields</li>
+          <li>PDF export</li>
+        </ul>
+      </div>
+      <div class="phase p2">
+        <span class="phase-tag">Phase 2 — Next</span>
+        <h3>Smart Validation</h3>
+        <ul>
+          <li>AI cross-checks field values</li>
+          <li>Inline help per field</li>
+          <li>More form types (account opening)</li>
+          <li>History saved in browser</li>
+        </ul>
+      </div>
+      <div class="phase p3">
+        <span class="phase-tag">Phase 3 — Later</span>
+        <h3>Enhanced UX</h3>
+        <ul>
+          <li>Voice input support</li>
+          <li>Bulk upload via Excel</li>
+          <li>Forex &amp; loan forms</li>
+          <li>Multi-language support</li>
+        </ul>
+      </div>
+      <div class="phase p4">
+        <span class="phase-tag">Phase 4 — Enterprise</span>
+        <h3>Production Ready</h3>
+        <ul>
+          <li>Backend proxy for API keys</li>
+          <li>SSO / login integration</li>
+          <li>Audit logs for compliance</li>
+          <li>Real banking API validation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 10: Thank You -->
+  <div class="slide slide-end">
+    <h1>Thank You</h1>
+    <p>Questions, feedback, or ideas?<br>Let's discuss how we can make banking forms faster and smarter.</p>
+    <div class="tagline">
+      "What used to take 5 minutes — now takes 30 seconds."
+    </div>
+  </div>
+
+</body>
+</html>
